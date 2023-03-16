@@ -17,8 +17,8 @@ The circuit:
 #include <LiquidCrystal.h>
 
 // Variables
-char dispChar = 65;     // char A
-const int DELAY = 150;  // ms
+char dispChar = 65;   // char A
+#define DELAY = 150;  // ms
 
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
@@ -26,7 +26,7 @@ const int rs = 11, en = 12, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 // Prototypes
-void snakePrint(const int &col, const int &row, char &disp, const int &dly);
+void snakePrint(const int &col, const int &row, char &disp);
 
 // Setup
 void setup() {
@@ -38,24 +38,23 @@ void setup() {
 // Loop
 void loop() {
   // Print dispChar to the LCD on top row.
-  for (int i = 0; i <= 15; i++) {
-    snakePrint(i, 0, dispChar, DELAY);
-  }
+  for (int i = 0; i < 16; i++)
+    snakePrint(i, 0, dispChar);
+
 
   // Print dispChar to the LCD on bottom row.
-  for (int i = 15; i >= -1; i--) {
-    snakePrint(i, 1, dispChar, DELAY);
-  }
+  for (int i = 16; i > 0; i--)
+    snakePrint(i, 1, dispChar);
 }
 
 // Prints chars from A to Z in snake pattern.
-void snakePrint(const int &col, const int &row, char &disp, const int &dly) {
+void snakePrint(const int &col, const int &row, char &disp) {
   // Clear screen, change position, display char
   lcd.clear();
   lcd.setCursor(col, row);
   lcd.print(disp);
   // Delay for char visibility
-  delay(dly);
+  delay(DELAY);
   // Roll display to next char
   disp++;
   if (disp > 90)  // char Z

@@ -32,7 +32,7 @@ void pulse_interrupt(void) {
 
 void setup() {
   // Initialize input and attachInterrupt
-  pinMode(inPin, INPUT);                                                   // Counting Pin 2 an input
+  pinMode(inPin, INPUT_PULLUP);                                                   // Counting Pin 2 an input
   attachInterrupt(digitalPinToInterrupt(inPin), pulse_interrupt, RISING);  // Interrupt routine definition
   // Initalize the screen
   lcd.begin(16, 2);
