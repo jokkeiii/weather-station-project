@@ -34,6 +34,7 @@ enum Wind_dir {
 volatile double value{};
 volatile double voltage{};
 Wind_dir wind{};
+int degrees{};
 String name{};
 
 // initialize the library by associating any needed LCD interface pin
@@ -43,6 +44,7 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 // Pototypes
 Wind_dir find_dir(const volatile double &);
+int wind_degree(const Wind_dir &);
 String wind_name(const Wind_dir &);
 
 void setup() {
@@ -54,7 +56,9 @@ void loop() {
   value = analogRead(A0);
   voltage = value * (5.0 / 1023);  // * ((R1 + R2) / R2);
   wind = find_dir(voltage);
-  name = wind_name(wind);
+  // name = wind_name(wind);
+  degrees = wind_degree(wind);
+  
 
   // Write the direction to screen
   lcd.setCursor(0, 0);
@@ -72,9 +76,24 @@ Wind_dir find_dir(const volatile double &volt) {
   else  if (volt >= 1.90 && volt < 2.38)  return Wind_dir::South;
   else  if (volt >= 2.38 && volt < 2.85)  return Wind_dir::Southwest;
   else  if (volt >= 2.85 && volt < 3.33)  return Wind_dir::West;
-  else  if (volt >= 3.33)                 return Wind_dir::Northwest;
+  else  if (volt >= 3.33 && volt < 4.00)  return Wind_dir::Northwest;
   else                                    return Wind_dir::Error;
 };
+
+int wind_degree(const Wind_dir &dir) {
+  switch (dir) {
+    case North:     return 0;
+    case Northeast: return 45;
+    case East:      return 90;
+    case Southeast: return 135;
+    case South:     return 180;
+    case Southwest: return 225;
+    case West:      return 270;
+    case Northwest: return 315;
+    case Error:     return -1;
+    default:        return -1;
+  }
+}
 
 String wind_name(const Wind_dir &dir) {
   switch (dir) {
