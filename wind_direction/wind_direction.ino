@@ -55,16 +55,16 @@ void setup() {
 void loop() {
   value = analogRead(A0);
   voltage = value * (5.0 / 1023);  // * ((R1 + R2) / R2);
-  wind = find_dir(voltage);
+  // wind = find_dir(voltage);
   // name = wind_name(wind);
-  degrees = wind_degree(wind);
-  
+  // degrees = wind_degree(wind);
+  degrees = voltage * 95.745;
 
   // Write the direction to screen
   lcd.setCursor(0, 0);
   lcd.print(voltage);
   lcd.setCursor(0, 1);
-  lcd.print(name);
+  lcd.print(degrees);
 }
 
 // Functions
