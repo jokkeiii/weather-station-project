@@ -53,34 +53,26 @@ void setup() {
 void loop() {
   value = analogRead(A0);
   voltage = value * (5.0 / 1023);  // * ((R1 + R2) / R2);
-  // Serial.print("Voltage: ");
-  // Serial.println(voltage);
-
   wind = find_dir(voltage);
-  // Serial.print("Direction: ");
-  // Serial.println(wind);
+  name = wind_name(wind);
 
-  // name = wind_name(wind);
-  // Serial.print("Direction: ");
-  // Serial.println(name);
-
-  // Write the counter to screen
+  // Write the direction to screen
   lcd.setCursor(0, 0);
-  lcd.print("Voltage: ");
-  lcd.setCursor(0, 1);
   lcd.print(voltage);
+  lcd.setCursor(0, 1);
+  lcd.print(name);
 }
 
 // Functions
 Wind_dir find_dir(const volatile double &volt) {
-        if (volt >= 1.20 && volt < 1.67)  return Wind_dir::North;
-  else  if (volt >= 1.67 && volt < 2.15)  return Wind_dir::Northeast;
-  else  if (volt >= 2.15 && volt < 2.63)  return Wind_dir::East;
-  else  if (volt >= 2.63 && volt < 3.10)  return Wind_dir::Southeast;
-  else  if (volt >= 3.10 && volt < 3.10)  return Wind_dir::South;
-  else  if (volt >= 3.58 && volt < 3.58)  return Wind_dir::Southwest;
-  else  if (volt >= 4.05 && volt < 4.05)  return Wind_dir::West;
-  else  if (volt >= 4.53 && volt < 5.00)  return Wind_dir::Northwest;
+        if (volt >= 0.00 && volt < 0.47)  return Wind_dir::North;
+  else  if (volt >= 0.47 && volt < 0.95)  return Wind_dir::Northeast;
+  else  if (volt >= 0.95 && volt < 1.43)  return Wind_dir::East;
+  else  if (volt >= 1.43 && volt < 1.90)  return Wind_dir::Southeast;
+  else  if (volt >= 1.90 && volt < 2.38)  return Wind_dir::South;
+  else  if (volt >= 2.38 && volt < 2.85)  return Wind_dir::Southwest;
+  else  if (volt >= 2.85 && volt < 3.33)  return Wind_dir::West;
+  else  if (volt >= 3.33)                 return Wind_dir::Northwest;
   else                                    return Wind_dir::Error;
 };
 
