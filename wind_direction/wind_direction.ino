@@ -53,21 +53,34 @@ void setup() {
 }
 
 void loop() {
-  value = analogRead(A0);
+  // value = analogRead(A0);
+  // voltage = value * (5.0 / 1023);  // * ((R1 + R2) / R2);
+  // // wind = find_dir(voltage);
+  // // name = wind_name(wind);
+  // // degrees = wind_degree(wind);
+  // degrees = voltage * 95.745;
+
+  // // Write the direction to screen
+  // lcd.setCursor(0, 0);
+  // lcd.print(voltage);
+  // lcd.setCursor(0, 1);
+  // lcd.print(degrees);
+}
+
+// Functions
+double cal_wind_dir(analog_in_pin) {
+  value = analogRead(analog_in_pin);
   voltage = value * (5.0 / 1023);  // * ((R1 + R2) / R2);
   // wind = find_dir(voltage);
   // name = wind_name(wind);
   // degrees = wind_degree(wind);
   degrees = voltage * 95.745;
 
-  // Write the direction to screen
-  lcd.setCursor(0, 0);
-  lcd.print(voltage);
   lcd.setCursor(0, 1);
   lcd.print(degrees);
-}
+  return degrees;
+};
 
-// Functions
 Wind_dir find_dir(const volatile double &volt) {
         if (volt >= 0.00 && volt < 0.47)  return Wind_dir::North;
   else  if (volt >= 0.47 && volt < 0.95)  return Wind_dir::Northeast;
@@ -97,14 +110,14 @@ int wind_degree(const Wind_dir &dir) {
 
 String wind_name(const Wind_dir &dir) {
   switch (dir) {
-    case North:     return "North";
-    case Northeast: return "Northeast";
-    case East:      return "East";
-    case Southeast: return "Southeast";
-    case South:     return "South";
-    case Southwest: return "Southwest";
-    case West:      return "West";
-    case Northwest: return "Northwest";
+    case North:     return "N    ";
+    case Northeast: return "NE   ";
+    case East:      return "E    ";
+    case Southeast: return "SE   ";
+    case South:     return "S    ";
+    case Southwest: return "SW   ";
+    case West:      return "W    ";
+    case Northwest: return "NW   ";
     case Error:     return "Error";
     default:        return "Error";
   }
