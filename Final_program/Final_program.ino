@@ -6,10 +6,10 @@ The circuit:
  *
  * Wind direction input to analog pin A0
  *
- * Button input to digital pin 15
- * Button input to digital pin 16
- * Button input to digital pin 17
- * Button input to digital pin 18
+ * Button input1 to digital pin 18
+ * Button input2 to digital pin 17
+ * Button input3 to digital pin 16
+ * Button input4 to digital pin 15
  *
  * LCD RS pin to digital pin 8
  * LCD Enable pin to digital pin 9
@@ -34,7 +34,9 @@ enum class Menu_state {
   state2,
   state3,
   state4,
-} static menu_state;
+} static menu_state{
+  Menu_state::state1
+};
 
 // MQTT and LCD-screen
 //-------------------------------------------------------------------------------------------------
@@ -68,7 +70,7 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 void cal_wind_speed();
 void pulse_interrupt();
-void change_menu(Menu_state& menu_choice, const byte input_pin);
+void change_menu();
 void cal_wind_dir();
 void det_wind_name();
 void fetch_IP();
@@ -93,10 +95,10 @@ static volatile double wind_dir_deg{};    // Calculate wind direction from volt
 static String wind_dir_name{};            // Determine wind direction name from voltage
 
 // Button input variables
-#define BTN_PIN1 15                         // Button input pin 15
-#define BTN_PIN2 16                         // Button input pin 16
-#define BTN_PIN3 17                         // Button input pin 17
-#define BTN_PIN4 18                         // Button input pin 18
+#define BTN_PIN1 18                         // Button input pin 18
+#define BTN_PIN2 17                         // Button input pin 17
+#define BTN_PIN3 16                         // Button input pin 16
+#define BTN_PIN4 15                         // Button input pin 15
 static volatile bool curr_btn_state{};      // Current reading from the input pin
 static volatile bool last_btn_state{};      // Previous reading from the input pin
 const byte dbnc_delay{ 50 };                // Debounce time, increase if the output flickers
@@ -134,34 +136,9 @@ void setup() {
 }
 
 void loop() {
-  switch (menu_state) {
-    case Menu_state::state1:
-      lcd.setCursor(0, 0);     // Set cursor to upper left corner
-      lcd.print("wind_spd=");  // Print string to lCD
-      lcd.print(wind_speed);   // Print value to lCD
-      lcd.print("       ");
-      break;
-    case Menu_state::state2:
-      lcd.setCursor(0, 0);      // Set cursor to upper left corner
-      lcd.print("wind_dir=");   // Print string to lCD
-      lcd.print(wind_dir_deg);  // Print value to lCD
-      lcd.print("       ");
-      break;
-    case Menu_state::state3:
-      lcd.setCursor(0, 0);
-      lcd.print(wind_dir_name);
-      lcd.print("       ");
-      break;
-    case Menu_state::state4:
-      lcd.setCursor(0, 0);
-      lcd.print(Ethernet.localIP());
-      lcd.print("       ");
-      break;
-  }
-
+  det_wind_name();
   cal_wind_dir();
-  // lcd.setCursor(0, 0);
-  // lcd.print("Are we connected?");
+  change_menu();
   Serial.println("Are we connected?");
   send_MQTT_message(wind_speed, wind_dir_deg);
   delay(1500);
@@ -186,18 +163,41 @@ void pulse_interrupt() {
 }
 
 // Read button input and change menu state
-void change_menu(Menu_state& menu_choice, const byte input_pin) {
-  bool pin_read = digitalRead(input_pin);  // Determine input state
-  if (pin_read != last_btn_state) {        // If input has changed start counting
-    dbnc_time = millis();
+// Then print deired string to top row
+void change_menu() {
+  if (digitalRead(BTN_PIN1) == 1)
+    menu_state = Menu_state::state1;
+  else if (digitalRead(BTN_PIN2) == 1)
+    menu_state = Menu_state::state2;
+  else if (digitalRead(BTN_PIN3) == 1)
+    menu_state = Menu_state::state3;
+  else if (digitalRead(BTN_PIN4) == 1)
+    menu_state = Menu_state::state4;
+
+  switch (menu_state) {
+    case Menu_state::state1:
+      lcd.setCursor(0, 0);     // Set cursor to upper left corner
+      lcd.print("wind_spd=");  // Print string to lCD
+      lcd.print(wind_speed);   // Print value to lCD
+      lcd.print("                ");
+      break;
+    case Menu_state::state2:
+      lcd.setCursor(0, 0);      // Set cursor to upper left corner
+      lcd.print("wind_dir=");   // Print string to lCD
+      lcd.print(wind_dir_deg);  // Print value to lCD
+      lcd.print("                ");
+      break;
+    case Menu_state::state3:
+      lcd.setCursor(0, 0);       // Set cursor to upper left corner
+      lcd.print(wind_dir_name);  // Print string to lCD
+      lcd.print("                ");
+      break;
+    case Menu_state::state4:
+      lcd.setCursor(0, 0);            // Set cursor to upper left corner
+      lcd.print(Ethernet.localIP());  // Print string to lCD
+      lcd.print("                ");
+      break;
   }
-  if ((millis() - dbnc_time) > dbnc_delay) {  // If time has passed debounce delay
-    if (pin_read != curr_btn_state) {         // If Input is not the same as before
-      curr_btn_state = pin_read;              // Change current button state
-      menu_state = menu_choice;               // Change menu state
-    }
-  }
-  last_btn_state = pin_read;  // Determine last button state
 }
 
 // Calculate analog input voltage and wind direction
@@ -205,6 +205,7 @@ void cal_wind_dir() {
   wind_dir_input = analogRead(DIR_PIN);
   wind_dir_volt = wind_dir_input * (5.0 / 1023);  // * ((R1 + R2) / R2);
   wind_dir_deg = wind_dir_volt * 95.745;          // Calculate Wind direction from voltage
+  if (wind_dir_deg > 360) wind_dir_deg = 0.0;     // If wind degrees exceed 360 degrees, change to 0 deg
 };
 
 // Rename wind direction name based on wind input voltage
