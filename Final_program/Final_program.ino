@@ -134,17 +134,32 @@ void setup() {
 }
 
 void loop() {
-  // switch (menu_state) {
-  //   case Menu_state::state1:
-  //     break;
-  //   case Menu_state::state2:
-  //     break;
-  //   case Menu_state::state3:
-  //     break;
-  //   case Menu_state::state4:
-  //     break;
-  // }
+  switch (menu_state) {
+    case Menu_state::state1:
+      lcd.setCursor(0, 0);     // Set cursor to upper left corner
+      lcd.print("wind_spd=");  // Print string to lCD
+      lcd.print(wind_speed);   // Print value to lCD
+      lcd.print("       ");
+      break;
+    case Menu_state::state2:
+      lcd.setCursor(0, 0);      // Set cursor to upper left corner
+      lcd.print("wind_dir=");   // Print string to lCD
+      lcd.print(wind_dir_deg);  // Print value to lCD
+      lcd.print("       ");
+      break;
+    case Menu_state::state3:
+      lcd.setCursor(0, 0);
+      lcd.print(wind_dir_name);
+      lcd.print("       ");
+      break;
+    case Menu_state::state4:
+      lcd.setCursor(0, 0);
+      lcd.print(Ethernet.localIP());
+      lcd.print("       ");
+      break;
+  }
 
+  cal_wind_dir();
   // lcd.setCursor(0, 0);
   // lcd.print("Are we connected?");
   Serial.println("Are we connected?");
@@ -232,14 +247,7 @@ void send_MQTT_message(const double input_wind_speed, const double input_wind_di
     // create message with header and data
     dtostrf(input_wind_speed, 3, 2, bufb);
     dtostrf(input_wind_direction, 3, 2, bufc);
-    sprintf(bufa, "IOTJS={\"ryhman_nimi\":\"Kouru\",\"wind_speed\":%s,\"wind_direction\":%s}", bufb, bufc);
-
-    lcd.setCursor(0, 0);           // Set cursor to upper left corner
-    lcd.print("wind_speed=");      // Print string to lCD
-    lcd.print(bufb);               // Print value to lCD
-    lcd.setCursor(1, 0);           // Set cursor to bottom left corner
-    lcd.print("wind_direction=");  // Print string to lCD
-    lcd.print(bufc);               // Print value to lCD
+    sprintf(bufa, "IOTJS={\"group_name\":\"Kouru\",\"wind_speed\":%s,\"wind_direction\":%s}", bufb, bufc);
 
     Serial.println(bufa);            // Print message to serial monitor
     client.publish(outTopic, bufa);  // Send message to MQTT server
