@@ -28,16 +28,6 @@ The circuit:
 #include <PubSubClient.h>   // include MQTT library
 #include <TimerOne.h>       // include timer library
 
-// Structs and enums
-enum class Menu_state {
-  state1,
-  state2,
-  state3,
-  state4,
-} static menu_state{
-  Menu_state::state1
-};
-
 // MQTT and LCD-screen
 //-------------------------------------------------------------------------------------------------
 
@@ -49,8 +39,11 @@ EthernetClient ethClient;  // Ethernet object var
 static byte mymac[6] = { 0x44, 0x76, 0x58, 0x17, 0x07, 0x62 };
 
 //  MQTT Server settings
-void callback(char* topic, byte* payload, unsigned int length);  // Subscription callback for received MQTTT messages
 PubSubClient client(server, Port, callback, ethClient);          // MQTT client
+void callback(char* topic, byte* payload, unsigned int length);  // Subscription callback for received MQTTT messages
+void fetch_IP();
+void send_MQTT_message(const double input_wind_speed, const double input_wind_direction);
+void Connect_MQTT_server();
 
 const char* deviceId = "Kouru";      // Set your device id (will be the MQTT client username) *yksilöllinen*
 const char* clientId = "KouruId23";  // Set a random string (max 23 chars, will be the MQTT client id) *yksilöllinen*
@@ -65,17 +58,18 @@ const char* deviceSecret = "tamk";   // Set your device secret (will be the MQTT
 const byte rs = 8, en = 9, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
-// Prototypes
+// Our code
 //-------------------------------------------------------------------------------------------------
 
-void cal_wind_speed();
-void pulse_interrupt();
-void change_menu();
-void cal_wind_dir();
-void det_wind_name();
-void fetch_IP();
-void send_MQTT_message(const double input_wind_speed, const double input_wind_direction);
-void Connect_MQTT_server();
+// Enum for determining lcd menu state
+enum class Menu_state {
+  state1,
+  state2,
+  state3,
+  state4,
+} static menu_state{
+  Menu_state::state1
+};
 
 // Variables
 //-------------------------------------------------------------------------------------------------
@@ -95,14 +89,19 @@ static volatile double wind_dir_deg{};    // Calculate wind direction from volt
 static String wind_dir_name{};            // Determine wind direction name from voltage
 
 // Button input variables
-#define BTN_PIN1 18                         // Button input pin 18
-#define BTN_PIN2 17                         // Button input pin 17
-#define BTN_PIN3 16                         // Button input pin 16
-#define BTN_PIN4 15                         // Button input pin 15
-static volatile bool curr_btn_state{};      // Current reading from the input pin
-static volatile bool last_btn_state{};      // Previous reading from the input pin
-const byte dbnc_delay{ 50 };                // Debounce time, increase if the output flickers
-static volatile unsigned long dbnc_time{};  // Last time the output pin was toggled
+#define BTN_PIN1 18  // Button input pin 18
+#define BTN_PIN2 17  // Button input pin 17
+#define BTN_PIN3 16  // Button input pin 16
+#define BTN_PIN4 15  // Button input pin 15
+
+// Prototypes
+//-------------------------------------------------------------------------------------------------
+
+void cal_wind_speed();
+void pulse_interrupt();
+void change_menu();
+void cal_wind_dir();
+void det_wind_name();
 
 // Setup and loop
 //-------------------------------------------------------------------------------------------------
@@ -174,27 +173,29 @@ void change_menu() {
   else if (digitalRead(BTN_PIN4) == 1)
     menu_state = Menu_state::state4;
 
+  // Set cursor to upper left corner and print
+  // wanted string to screen and some empty space
   switch (menu_state) {
     case Menu_state::state1:
-      lcd.setCursor(0, 0);     // Set cursor to upper left corner
-      lcd.print("wind_spd=");  // Print string to lCD
-      lcd.print(wind_speed);   // Print value to lCD
+      lcd.setCursor(0, 0);
+      lcd.print("wind_spd=");
+      lcd.print(wind_speed);
       lcd.print("                ");
       break;
     case Menu_state::state2:
-      lcd.setCursor(0, 0);      // Set cursor to upper left corner
-      lcd.print("wind_dir=");   // Print string to lCD
-      lcd.print(wind_dir_deg);  // Print value to lCD
+      lcd.setCursor(0, 0);
+      lcd.print("wind_dir=");
+      lcd.print(wind_dir_deg);
       lcd.print("                ");
       break;
     case Menu_state::state3:
-      lcd.setCursor(0, 0);       // Set cursor to upper left corner
-      lcd.print(wind_dir_name);  // Print string to lCD
+      lcd.setCursor(0, 0);
+      lcd.print(wind_dir_name);
       lcd.print("                ");
       break;
     case Menu_state::state4:
-      lcd.setCursor(0, 0);            // Set cursor to upper left corner
-      lcd.print(Ethernet.localIP());  // Print string to lCD
+      lcd.setCursor(0, 0);
+      lcd.print(Ethernet.localIP());
       lcd.print("                ");
       break;
   }
