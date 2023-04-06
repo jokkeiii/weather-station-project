@@ -34,6 +34,7 @@ enum Wind_dir {
 volatile double value{};
 volatile double voltage{};
 Wind_dir wind{};
+int degrees{};
 String name{};
 
 // initialize the library by associating any needed LCD interface pin
@@ -43,6 +44,7 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 // Pototypes
 Wind_dir find_dir(const volatile double &);
+int wind_degree(const Wind_dir &);
 String wind_name(const Wind_dir &);
 
 void setup() {
@@ -51,49 +53,71 @@ void setup() {
 }
 
 void loop() {
-  value = analogRead(A0);
-  voltage = value * (5.0 / 1023);  // * ((R1 + R2) / R2);
-  // Serial.print("Voltage: ");
-  // Serial.println(voltage);
+  // value = analogRead(A0);
+  // voltage = value * (5.0 / 1023);  // * ((R1 + R2) / R2);
+  // // wind = find_dir(voltage);
+  // // name = wind_name(wind);
+  // // degrees = wind_degree(wind);
+  // degrees = voltage * 95.745;
 
-  wind = find_dir(voltage);
-  // Serial.print("Direction: ");
-  // Serial.println(wind);
-
-  // name = wind_name(wind);
-  // Serial.print("Direction: ");
-  // Serial.println(name);
-
-  // Write the counter to screen
-  lcd.setCursor(0, 0);
-  lcd.print("Voltage: ");
-  lcd.setCursor(0, 1);
-  lcd.print(voltage);
+  // // Write the direction to screen
+  // lcd.setCursor(0, 0);
+  // lcd.print(voltage);
+  // lcd.setCursor(0, 1);
+  // lcd.print(degrees);
 }
 
 // Functions
+double cal_wind_dir(analog_in_pin) {
+  value = analogRead(analog_in_pin);
+  voltage = value * (5.0 / 1023);  // * ((R1 + R2) / R2);
+  // wind = find_dir(voltage);
+  // name = wind_name(wind);
+  // degrees = wind_degree(wind);
+  degrees = voltage * 95.745;
+
+  lcd.setCursor(0, 1);
+  lcd.print(degrees);
+  return degrees;
+};
+
 Wind_dir find_dir(const volatile double &volt) {
-        if (volt >= 1.20 && volt < 1.67)  return Wind_dir::North;
-  else  if (volt >= 1.67 && volt < 2.15)  return Wind_dir::Northeast;
-  else  if (volt >= 2.15 && volt < 2.63)  return Wind_dir::East;
-  else  if (volt >= 2.63 && volt < 3.10)  return Wind_dir::Southeast;
-  else  if (volt >= 3.10 && volt < 3.10)  return Wind_dir::South;
-  else  if (volt >= 3.58 && volt < 3.58)  return Wind_dir::Southwest;
-  else  if (volt >= 4.05 && volt < 4.05)  return Wind_dir::West;
-  else  if (volt >= 4.53 && volt < 5.00)  return Wind_dir::Northwest;
+        if (volt >= 0.00 && volt < 0.47)  return Wind_dir::North;
+  else  if (volt >= 0.47 && volt < 0.95)  return Wind_dir::Northeast;
+  else  if (volt >= 0.95 && volt < 1.43)  return Wind_dir::East;
+  else  if (volt >= 1.43 && volt < 1.90)  return Wind_dir::Southeast;
+  else  if (volt >= 1.90 && volt < 2.38)  return Wind_dir::South;
+  else  if (volt >= 2.38 && volt < 2.85)  return Wind_dir::Southwest;
+  else  if (volt >= 2.85 && volt < 3.33)  return Wind_dir::West;
+  else  if (volt >= 3.33 && volt < 4.00)  return Wind_dir::Northwest;
   else                                    return Wind_dir::Error;
 };
 
+int wind_degree(const Wind_dir &dir) {
+  switch (dir) {
+    case North:     return 0;
+    case Northeast: return 45;
+    case East:      return 90;
+    case Southeast: return 135;
+    case South:     return 180;
+    case Southwest: return 225;
+    case West:      return 270;
+    case Northwest: return 315;
+    case Error:     return -1;
+    default:        return -1;
+  }
+}
+
 String wind_name(const Wind_dir &dir) {
   switch (dir) {
-    case North:     return "North";
-    case Northeast: return "Northeast";
-    case East:      return "East";
-    case Southeast: return "Southeast";
-    case South:     return "South";
-    case Southwest: return "Southwest";
-    case West:      return "West";
-    case Northwest: return "Northwest";
+    case North:     return "N    ";
+    case Northeast: return "NE   ";
+    case East:      return "E    ";
+    case Southeast: return "SE   ";
+    case South:     return "S    ";
+    case Southwest: return "SW   ";
+    case West:      return "W    ";
+    case Northwest: return "NW   ";
     case Error:     return "Error";
     default:        return "Error";
   }

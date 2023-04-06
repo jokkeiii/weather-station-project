@@ -18,7 +18,7 @@ The circuit:
 
 // Variables
 char dispChar = 65;   // char A
-#define DELAY = 150;  // ms
+#define DELAY 150  // ms
 
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
@@ -38,12 +38,12 @@ void setup() {
 // Loop
 void loop() {
   // Print dispChar to the LCD on top row.
-  for (int i = 0; i < 16; i++)
+  for (int i = 0; i <= 15; i++)
     snakePrint(i, 0, dispChar);
 
 
   // Print dispChar to the LCD on bottom row.
-  for (int i = 16; i > 0; i--)
+  for (int i = 15; i >= 0; i--)
     snakePrint(i, 1, dispChar);
 }
 
